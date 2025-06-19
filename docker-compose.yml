@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: policy_backend
+    volumes:
+      - ./data:/app/data              # CSV и сканы
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend_app/Dockerfile
+    container_name: policy_frontend
+    ports:
+      - "8083:80"                     # localhost:8080 → Nginx 80
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
