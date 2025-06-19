@@ -78,14 +78,15 @@ data/           CSV exports, scans
 
 ---
 
-## Troubleshooting
+## Troubleshooting
 
-| Symptom                       | Fix                                                                                |
-| ----------------------------- | ---------------------------------------------------------------------------------- |
+| Symptom                     | Fix                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------- |
 | `CORS Missing Allow-Origin` | Frontend env `VITE_API_URL=http://backend:8000` must match compose service name. |
-| Port already in use           | Change `ports:` in compose or stop conflicting service (`lsof -i :8080`).      |
-| Build slow every time         | Ensure `.dockerignore` lists `node_modules`, `__pycache__`, `tests`, etc.  |
+| Port already in use         | Change `ports:` in compose or stop conflicting service (`lsof -i :8080`).        |
+| Build slow every time       | Ensure `.dockerignore` lists `node_modules`, `__pycache__`, `tests`, etc.        |
 
 ---
 
-MIT © 2025 – Demo project for Ingosstrakh. Not production‑hardened.пще
+MIT © 2025 – Demo project for Ingosstrakh. Not production‑hardened.
+
