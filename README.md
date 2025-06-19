@@ -1,4 +1,3 @@
-
 # 🚀 Quick Docker Setup for Policy Issue
 
 Spin‑up** ****backend** (FastAPI) and** ****frontend** (Vue + Nginx) with a single command.
@@ -25,21 +24,7 @@ cd policy-issue
 
 ---
 
-## 2 · Optional — edit environment
-
-`backend/.env` (example already committed)
-
-```dotenv
-# backend/.env
-PAYMENT_GATE_URL=https://sandbox.pay/api
-APP_ENV=prod
-```
-
-If you change ports, also tweak** **`docker-compose.yml` →** **`ports:`.
-
----
-
-## 3 · Build & up (one‑liner)
+<h2> 2 · Build & up (one‑liner)
 
 ```bash
 # from repo root
@@ -50,7 +35,7 @@ docker compose up -d --build
 
 ---
 
-## 4 · Open your browser
+## 3· Open your browser
 
 | Service  | URL                                                   |
 | -------- | ----------------------------------------------------- |
@@ -61,7 +46,7 @@ docker compose up -d --build
 
 ---
 
-## 5 · Logs & rebuild
+## 4· Logs & rebuild
 
 ```bash
 # live logs (all services)
@@ -73,7 +58,7 @@ docker compose up -d --build backend
 
 ---
 
-## 6 · Shut down
+## 5· Shut down
 
 ```bash
 docker compose down        # stop & remove containers★
