@@ -17,7 +17,7 @@ class ContactInfo(BaseModel):
 
 class User(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
-    name: str = Field(..., alias="name")
+    first_name: str = Field(..., alias="first name")
     last_name: str = Field(..., alias="last name")
     middle_name: Optional[str] = Field(None, alias="middle name")
     sex: SexEnum = Field(..., alias="sex")

@@ -1,39 +1,63 @@
 // src/services/api.js
-const BASE = 'http://localhost:8000'   // поправь, если бек слушает иначе
-export const api = axios.create({ BASE });
+// const BASE = 'http://localhost:8000'   // поправь, если бек слушает иначе
+export const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-export async function scanDocument(point) {
-  const r = await fetch(`${BASE}/scan`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+async function request(path, options = {}) {
+  const r = await fetch(`${BASE}${path}`, {
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    ...options,
+  });
+
+  if (!r.ok) {
+    const text = await r.text().catch(() => "");
+    throw new Error(text || `HTTP ${r.status} ${r.statusText}`);
+  }
+
+  // некоторые ответы могут быть пустыми, но у тебя везде json
+  return r.json();
+}
+
+export function scanDocument(point) {
+  return request("/scan", {
+    method: "POST",
     body: JSON.stringify({ point }),
-  })
-  if (!r.ok) throw new Error('scan error')
-  return r.json()
+  });
 }
 
-export async function submitForm(data) {
-  const r = await fetch(`${BASE}/user/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+export function submitForm(data) {
+  return request("/user/register", {
+    method: "POST",
     body: JSON.stringify(data),
-  })
-  if (!r.ok) throw new Error('submit error')
-  return r.json()
+  });
 }
 
-export async function initPayment(payload) {
-  const r = await fetch(`${BASE}/payment/init`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+export function initPayment(payload) {
+  return request("/payment/init", {
+    method: "POST",
     body: JSON.stringify(payload),
-  })
-  if (!r.ok) throw new Error('initPayment error')
-  return r.json()                      // { session_id, amount, currency }
+  });
 }
 
-export async function getPaymentStatus(sessionId) {
-  const r = await fetch(`${BASE}/payment/status/${sessionId}`)
-  if (!r.ok) throw new Error('status error')
-  return r.json()                      // { status, tx_id }
+export function getPaymentStatus(sessionId) {
+  return request(`/payment/status/${sessionId}`, { method: "GET" });
+}
+
+export function getPolicyQuote(payload) {
+  return request("/policy/quote", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function downloadPolicyXlsxFromQuote(quote) {
+  const r = await fetch(`${BASE}/policy/generate-xlsx-from-quote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(quote),
+  });
+  if (!r.ok) {
+    const text = await r.text().catch(() => "");
+    throw new Error(text || `HTTP ${r.status}`);
+  }
+  return r.blob();
 }

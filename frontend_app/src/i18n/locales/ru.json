@@ -44,7 +44,7 @@
   "scan_document.back": "Назад",
   "scan_document.title": "Приложите документ к сканеру",
   "edit_form.title": "Проверьте данные",
-  "edit_form.fields.name": "Имя",
+  "edit_form.fields.first_name": "Имя",
   "edit_form.fields.last_name": "Фамилия",
   "edit_form.fields.middle_name": "Отчество",
   "edit_form.fields.sex": "Пол",

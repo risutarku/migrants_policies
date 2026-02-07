@@ -14,7 +14,7 @@ async def scan():
     await asyncio.sleep(2)
     # Here you would implement the logic for scanning, e.g., scanning files, directories, etc.
     return {
-        "name":               "Ivan",
+        "first_name":         "Ivan",
         "last_name":          "Ivanov",
         "middle_name":        "Ivanovich",
         "sex":                "male",

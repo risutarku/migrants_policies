@@ -10,7 +10,7 @@ async def test_write_to_csv(tmp_path):
     csv_path = tmp_path / "test.csv"
     now = datetime.now()
     user = RegisterUser(
-        name="Ivan",
+        first_name="Ivan",
         last_name="Petrov",
         middle_name="Sergeevich",
         sex=SexEnum.male,
@@ -31,7 +31,7 @@ async def test_write_to_csv(tmp_path):
     lines = content.strip().split("\n")
 
     assert (
-        "name,last name,middle name,sex,birthday,passport series,passport number,passport issue date,passport expiry date,passport issuer,transaction id,create date"
+        "fist name,last name,middle name,sex,birthday,passport series,passport number,passport issue date,passport expiry date,passport issuer,transaction id,create date"
         in lines[0]
     )
     assert (

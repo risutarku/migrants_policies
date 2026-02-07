@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api import api_insurance, api_user, api_scan, api_payment
+from app.api import api_insurance, api_user, api_scan, api_payment, api_policy_file
 from fastapi.middleware.cors import CORSMiddleware
 
 description = {
@@ -24,3 +24,4 @@ app.include_router(api_user.router, prefix="/user", tags=["user"])
 app.include_router(api_insurance.router, prefix="/insurance", tags=["insurance"])
 app.include_router(api_scan.router, prefix="/scan")
 app.include_router(api_payment.router, prefix="/payment", tags=["payment"])
+app.include_router(api_policy_file.router, prefix="/policy", tags=["policy"])

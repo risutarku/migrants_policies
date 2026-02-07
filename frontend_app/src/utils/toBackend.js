@@ -35,7 +35,7 @@ export function makeInitPayload(form, amount) {
     idempotency_key: uuid(),          // защита от повторных кликов
     amount,
     user: {
-      'name'               : form.name,
+      'first_name'         : form.first_name,
       'last_name'          : form.last_name,
       'middle_name'        : form.middle_name || null,
       'sex'                : form.sex,

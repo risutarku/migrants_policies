@@ -3,7 +3,7 @@ from app.models.user import SexEnum
 
 
 class ScanResponse(BaseModel):
-    name: str
+    first_name: str
     last_name: str  # alias «Last name» для фронта
     middle_name: str | None
     sex: SexEnum
