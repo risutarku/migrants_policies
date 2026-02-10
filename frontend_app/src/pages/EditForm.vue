@@ -1,65 +1,79 @@
-EditForm.vue
 <!-- =================================================== -->
-<script setup lang="ts">
-import { reactive, watch } from "vue";
+<!-- EditForm.vue                                         -->
+<!-- =================================================== -->
+
+<script setup>
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useFlowStore } from "@/store";
-import { submitForm } from "@/services/api";
+import { savePolicyDraft } from "@/services/api";
 
 const { t } = useI18n();
 const router = useRouter();
 const flow = useFlowStore();
 
-// Описание полей и подписей
-const fields = [
-  { key: "first_name", label: t("edit_form.fields.first_name") },
+const fields = computed(() => [
   { key: "last_name", label: t("edit_form.fields.last_name") },
+  { key: "first_name", label: t("edit_form.fields.first_name") },
   { key: "middle_name", label: t("edit_form.fields.middle_name") },
   { key: "sex", label: t("edit_form.fields.sex") },
-  { key: "birthday", label: t("edit_form.fields.birthday") },
+  { key: "birthday", label: t("edit_form.fields.birthday"), type: "date" },
   { key: "passport_series", label: t("edit_form.fields.passport_series") },
   { key: "passport_number", label: t("edit_form.fields.passport_number") },
   {
     key: "passport_issue_date",
     label: t("edit_form.fields.passport_issue_date"),
+    type: "date",
   },
   {
     key: "passport_expiry_date",
     label: t("edit_form.fields.passport_expiry_date"),
+    type: "date",
   },
   { key: "passport_issuer", label: t("edit_form.fields.passport_issuer") },
-];
+]);
+
+const submitting = ref(false);
 
 function back() {
   router.back();
 }
 
-let submitting = false;
-
 async function pay() {
-  if (submitting) return;
-  submitting = true;
+  if (submitting.value) return;
+  submitting.value = true;
+
   try {
+    if (!flow.employeeTabNumber) {
+      throw new Error(
+        t("landing.employee_required") || "Введите табельный номер",
+      );
+    }
+
     const payload = {
+      employee_tab_number: String(flow.employeeTabNumber),
+      arrived_for_hire: !!flow.arrived_for_hire,
+      lang: flow.lang,
+      policy_variant: flow.policyVariant,
       user: { ...flow.formData },
       contacts: { ...flow.formContacts },
-      policy: { ...flow.formPolicy },
-      arrived_for_hire: flow.arrived_for_hire,
+      policy: {
+        title: flow.formPolicy.title,
+        amount: flow.formPolicy.price,
+      },
     };
 
-    //для проверки данных в консоли
-    console.log("PAYLOAD USER:", payload.user);
-    console.log("PAYLOAD ARRIVED FOR HIRE:", payload.arrived_for_hire);
+    const response = await savePolicyDraft(payload);
+    flow.policyId = response.policy_id;
 
-    //await submitForm(payload);
     router.push("/payment_init");
   } catch (err) {
-    console.error("submitForm failed", err);
-    const msg = err?.message || String(err);
-    alert(msg || t("submit_error") || "Ошибка отправки данных");
+    console.error("savePolicyDraft failed", err);
+    const msg = err && err.message ? err.message : String(err);
+    alert(msg || t("edit_form.submit_error") || "Ошибка сохранения данных");
   } finally {
-    submitting = false;
+    submitting.value = false;
   }
 }
 </script>
@@ -80,7 +94,7 @@ async function pay() {
         {{ t("edit_form.title") }}
       </h1>
 
-      <div class="grid gap-4 text-left grid-cols-1 sm:grid-cols-2">
+      <div class="grid gap-4 text-left grid-cols-1 sm:grid-cols-2 w-full">
         <div v-for="f in fields" :key="f.key">
           <label class="block mb-1 font-medium text-sm text-gray-700">{{
             f.label
@@ -88,15 +102,7 @@ async function pay() {
           <input
             :value="flow.formData[f.key]"
             @input="flow.formData[f.key] = $event.target.value"
-            :type="
-              [
-                'birthday',
-                'passport_issue_date',
-                'passport_expiry_date',
-              ].includes(f.key)
-                ? 'date'
-                : 'text'
-            "
+            :type="f.type || 'text'"
             class="w-full rounded-2xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
           />
         </div>
@@ -112,7 +118,7 @@ async function pay() {
           v-model="flow.arrived_for_hire"
           class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
         />
-        Цель приезда — работа
+        {{ t("edit_form.arrived_for_hire") }}
       </label>
     </div>
 
@@ -125,9 +131,10 @@ async function pay() {
       </button>
       <button
         @click="pay"
-        class="flex-1 rounded-2xl bg-blue-600 py-4 px-6 text-white text-lg font-semibold shadow-lg hover:bg-blue-700 active:shadow-none transition-all"
+        :disabled="submitting"
+        class="flex-1 rounded-2xl bg-blue-600 py-4 px-6 text-white text-lg font-semibold shadow-lg hover:bg-blue-700 active:shadow-none transition-all disabled:opacity-60"
       >
-        {{ t("edit_form.pay") }}
+        {{ submitting ? t("edit_form.saving") : t("edit_form.pay") }}
       </button>
     </div>
   </div>

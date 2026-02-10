@@ -2,11 +2,13 @@
 <!-- ScanDocument.vue                                     -->
 <!-- =================================================== -->
 
-<script setup lang="ts">
-import { ref, onMounted } from "vue";
+<script setup>
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useFlowStore } from "@/store";
+import { scanPassportBeorg } from "@/services/api";
+import { fileToBase64NoPrefix } from "@/utils/fileToBase64";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -14,37 +16,90 @@ const flow = useFlowStore();
 
 const scanning = ref(false);
 const overlayVisible = ref(false);
+const errorMsg = ref("");
+const withRegistration = ref(true);
 
-onMounted(() => {
-  // 2 секундная пауза перед имитацией сканирования
-  setTimeout(startScan, 2000);
-});
+// если нужно привести дату DD.MM.YYYY -> YYYY-MM-DD для <input type="date">
+function toISODateMaybe(s) {
+  if (!s) return s;
+  // уже ISO?
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
 
-async function startScan() {
-  overlayVisible.value = true;
-  scanning.value = true;
-  try {
-    const res = await fetch("http://localhost:8000/scan", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // body: JSON.stringify({}) // добавьте тело запроса при необходимости
-    });
-    const data = await res.json();
-    flow.formData = data;
-  } catch (e) {
-    console.error(e);
-  } finally {
-    scanning.value = false;
-    // убираем полосу через 1.5 с
-    setTimeout(() => (overlayVisible.value = false), 1500);
-    router.push("/edit"); // переход на EditData.vue
-  }
+  // DD.MM.YYYY
+  const m = String(s).match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+
+  return s;
 }
 
 function back() {
   router.back();
 }
+
+function startOverlay() {
+  overlayVisible.value = true;
+  scanning.value = true;
+}
+
+function stopOverlay() {
+  scanning.value = false;
+  setTimeout(() => (overlayVisible.value = false), 1500);
+}
+
+async function onFilesSelected(e) {
+  errorMsg.value = "";
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+
+  startOverlay();
+
+  try {
+    // 1) файл(ы) -> base64[]
+    const images = [];
+    for (const f of files) {
+      images.push(await fileToBase64NoPrefix(f));
+    }
+
+    // 2) отправляем на бэк
+    const res = await scanPassportBeorg(images, withRegistration.value);
+    const fields = res?.fields || {};
+
+    // 3) маппинг в твою форму
+    if (fields.last_name) flow.formData.last_name = fields.last_name;
+    if (fields.first_name) flow.formData.first_name = fields.first_name;
+    if (fields.middle_name) flow.formData.middle_name = fields.middle_name;
+
+    if (fields.sex) flow.formData.sex = fields.sex;
+
+    if (fields.birthday)
+      flow.formData.birthday = toISODateMaybe(fields.birthday);
+
+    if (fields.passport_series)
+      flow.formData.passport_series = fields.passport_series;
+    if (fields.passport_number)
+      flow.formData.passport_number = fields.passport_number;
+
+    if (fields.passport_issue_date)
+      flow.formData.passport_issue_date = toISODateMaybe(
+        fields.passport_issue_date,
+      );
+
+    if (fields.passport_issuer)
+      flow.formData.passport_issuer = fields.passport_issuer;
+
+    // 4) переход на редактирование
+    router.push("/edit");
+  } catch (err) {
+    console.error(err);
+    errorMsg.value = err?.message ? String(err.message) : String(err);
+  } finally {
+    stopOverlay();
+    // чтобы можно было выбрать тот же файл ещё раз
+    e.target.value = "";
+  }
+}
 </script>
+
 <template>
   <div
     class="relative flex flex-col items-center min-h-screen bg-gradient-to-b from-sky-50 to-white px-4 py-8 overflow-hidden"
@@ -57,16 +112,56 @@ function back() {
         alt="Ingosstrakh logo"
         class="w-60 h-auto my-6 ml-14 select-none pointer-events-none self-start"
       />
+
       <h1
         class="font-extrabold leading-tight text-3xl sm:text-4xl md:text-5xl whitespace-pre-line"
       >
         {{ t("scan_document.title") }}
       </h1>
+
       <img
         src="/scan_document.png"
         alt="scan"
         class="w-120 h-auto pointer-events-none select-none"
       />
+
+      <!-- NEW: выбор файлов паспорта -->
+      <div class="w-full max-w-md text-left space-y-3">
+        <label
+          class="flex items-center gap-3 text-base font-medium text-gray-700 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            v-model="withRegistration"
+            class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            :disabled="scanning"
+          />
+          {{
+            t("scan_document.with_registration") ||
+            "Включая страницу с пропиской"
+          }}
+        </label>
+
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          @change="onFilesSelected"
+          :disabled="scanning"
+          class="block w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-4 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+        />
+
+        <p class="text-sm text-gray-600">
+          Можно выбрать 1–2 изображения (разворот + прописка).
+        </p>
+
+        <div
+          v-if="errorMsg"
+          class="rounded-2xl bg-red-50 border border-red-200 p-3 text-red-700"
+        >
+          {{ errorMsg }}
+        </div>
+      </div>
     </main>
 
     <!-- Scanning stripe overlay -->
@@ -79,12 +174,23 @@ function back() {
       ></div>
     </div>
 
-    <button
-      @click="back"
-      class="w-full max-w-xs rounded-2xl bg-gray-200 py-4 px-6 text-gray-800 text-lg font-semibold shadow hover:bg-gray-300 active:shadow-none transition-all"
-    >
-      {{ t("scan_document.back") }}
-    </button>
+    <div class="w-full flex flex-col items-center gap-3">
+      <button
+        @click="back"
+        class="w-full max-w-xs rounded-2xl bg-gray-200 py-4 px-6 text-gray-800 text-lg font-semibold shadow hover:bg-gray-300 active:shadow-none transition-all"
+        :disabled="scanning"
+      >
+        {{ t("scan_document.back") }}
+      </button>
+
+      <button
+        @click="$router.push('/edit')"
+        class="w-full max-w-xs rounded-2xl bg-gray-100 py-4 px-6 text-gray-800 text-lg font-semibold shadow hover:bg-gray-200 active:shadow-none transition-all"
+        :disabled="scanning"
+      >
+        {{ t("scan_document.skip") || "Пропустить и заполнить вручную" }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -93,7 +199,6 @@ function back() {
   0% {
     transform: translateY(-100%);
   }
-
   100% {
     transform: translateY(100vh);
   }

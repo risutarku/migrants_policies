@@ -1,7 +1,10 @@
-from typing import Optional
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import date, datetime
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from typing import Optional
+
+from pydantic import BaseModel, field_validator
 
 
 class SexEnum(str, Enum):
@@ -9,51 +12,40 @@ class SexEnum(str, Enum):
     female = "female"
 
 
+def _parse_date(v) -> date:
+    """Accepts date or 'YYYY-MM-DD' string."""
+    if isinstance(v, date) and not isinstance(v, datetime):
+        return v
+    if isinstance(v, datetime):
+        return v.date()
+    if isinstance(v, str):
+        return datetime.strptime(v, "%Y-%m-%d").date()
+    raise ValueError("Date must be in format YYYY-MM-DD")
+
+
 class ContactInfo(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    email: str = Field(..., alias="email")
-    phone_number: str = Field(..., alias="phone number")
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
 
 
 class User(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    first_name: str = Field(..., alias="first name")
-    last_name: str = Field(..., alias="last name")
-    middle_name: Optional[str] = Field(None, alias="middle name")
-    sex: SexEnum = Field(..., alias="sex")
-    birthday: datetime = Field(..., alias="birthday", description="Format: yyyy-mm-dd")
-    passport_series: int = Field(..., alias="passport series")
-    passport_number: int = Field(..., alias="passport number")
-    passport_issue_date: datetime = Field(
-        ..., alias="passport issue date", description="Format: yyyy-mm-dd"
-    )
-    passport_expiry_date: Optional[datetime] = Field(
-        None, alias="passport expiry date", description="Format: yyyy-mm-dd"
-    )
-    passport_issuer: str = Field(..., alias="passport issuer")
-    create_date: datetime = Field(
-        default_factory=datetime.now,
-        alias="create date",
-        description="Format: yyyy-mm-dd",
-    )
+    first_name: str
+    last_name: str
+    middle_name: Optional[str] = None
+    sex: Optional[SexEnum] = None
 
-    @field_validator("birthday", "passport_issue_date", mode="before")
-    def validate_date_format(cls, v):
-        if isinstance(v, datetime):
-            return v
-        try:
-            return datetime.strptime(v, "%Y-%m-%d")
-        except (ValueError, TypeError):
-            raise ValueError("Date must be in format yyyy-mm-dd")
+    # используем date (а не datetime), чтобы проще стыковать с БД/формой
+    birthday: date
 
-    @field_validator("sex", mode="after")
-    def convert_sex_enum_to_str(cls, v: SexEnum) -> str:
-        return v.value
+    passport_series: str
+    passport_number: str
+    passport_issue_date: Optional[date] = None
+    passport_expiry_date: Optional[date] = None
+    passport_issuer: Optional[str] = None
 
-    @property
-    def birthday_str(self) -> str:
-        return self.birthday.strftime("%Y-%m-%d")
-
-    @property
-    def passport_issue_date_str(self) -> str:
-        return self.passport_issue_date.strftime("%Y-%m-%d")
+    @field_validator("birthday", "passport_issue_date", "passport_expiry_date", mode="before")
+    @classmethod
+    def _v_dates(cls, v):
+        if v is None or v == "":
+            return None
+        return _parse_date(v)

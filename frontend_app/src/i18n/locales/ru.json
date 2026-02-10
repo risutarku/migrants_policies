@@ -33,7 +33,12 @@
   "landing.title": "Обязательная медстраховка ДМС за 5 минут",
   "landing.subtitle": "Для миграционного учёта, патента, работы и проживания в Российской Федерации",
   "landing.cta": "Оформить страховку",
+  "landing.employee_number": "Номер сотрудника",
   "choose_policy.title": "Выберите полис",
+  "choose_policy.basic_title": "Обязательный ДМС",
+  "choose_policy.extended_title": "Расширенный ДМС",
+  "choose_policy.basic_desc": "ДМС - это обязательная медицинская страховка для мигрантов, дающая доступ к базовой медицинской помощи.",
+  "choose_policy.extended_desc": "Расширенный ДМС - это полис с дополнительными услугами: лечение у врачей-специалистов, обследования и помощь в частных клиниках.",
   "choose_policy.next": "Продолжить",
   "choose_policy.back": "Назад",
   "contact_info.title": "Введите контактные данные",
@@ -54,6 +59,7 @@
   "edit_form.fields.passport_issue_date": "Дата выдачи",
   "edit_form.fields.passport_expiry_date": "Дата окончания",
   "edit_form.fields.passport_issuer": "Кем выдан",
+  "edit_form.arrived_for_hire": "Цель приезда - работа",
   "edit_form.back": "Назад",
   "edit_form.pay": "К оплате",
   "payment_init.title": "Оплатите полис",
@@ -65,5 +71,7 @@
   "payment_success.title": "Оплачено",
   "payment_success.text_1": "Отправили полис и чек на электронную почту",
   "payment_success.text_2": "На чеке будет указан адрес, где можно получить оригинал полиса",
-  "payment_success.done": "Завершить"
+  "payment_success.done": "Завершить",
+  "payment_success.download": "Скачать",
+  "payment_success.generating": "Скачивание полиса"
 }

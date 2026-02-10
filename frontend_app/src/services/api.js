@@ -17,21 +17,22 @@ async function request(path, options = {}) {
   return r.json();
 }
 
-export function scanDocument(point) {
+export function scanDocument() {
   return request("/scan", {
     method: "POST",
-    body: JSON.stringify({ point }),
+    body: JSON.stringify({}),
   });
 }
 
-export function submitForm(data) {
-  return request("/user/register", {
+export function savePolicyDraft(payload) {
+  return request("/payment/draft-save", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 
 export function initPayment(payload) {
+  // payload: { policy_id, session_id, idempotency_key }
   return request("/payment/init", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -42,22 +43,23 @@ export function getPaymentStatus(sessionId) {
   return request(`/payment/status/${sessionId}`, { method: "GET" });
 }
 
-export function getPolicyQuote(payload) {
-  return request("/policy/quote", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export async function downloadPolicyXlsxFromQuote(quote) {
-  const r = await fetch(`${BASE}/policy/generate-xlsx-from-quote`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(quote),
+export async function downloadPolicyById(policyId) {
+  const r = await fetch(`${BASE}/policy/download/${policyId}`, {
+    method: "GET",
   });
   if (!r.ok) {
     const text = await r.text().catch(() => "");
-    throw new Error(text || `HTTP ${r.status}`);
+    throw new Error(text || `HTTP ${r.status} ${r.statusText}`);
   }
   return r.blob();
+}
+
+export function scanPassportBeorg(imagesBase64, withRegistration = true) {
+  return request("/scan/beorg-passport", {
+    method: "POST",
+    body: JSON.stringify({
+      images: imagesBase64,
+      with_registration: withRegistration,
+    }),
+  });
 }

@@ -5,7 +5,7 @@ export const pinia = createPinia();
 export const useFlowStore = defineStore("flow", {
   state: () => ({
     lang: "ru",
-    point: null,
+    policyVariant: "basic", // basic|extended
 
     // ➜ данные из сканера / формы
     formData: {
@@ -28,9 +28,10 @@ export const useFlowStore = defineStore("flow", {
       phone_number: "",
       email: "",
     },
-    sessionID: null,
+    sessionId: null,
     txId: null,
     arrived_for_hire: false,
-    employeeTabNumber: 1,
+    employeeTabNumber: "",
+    policyId: null,
   }),
 });

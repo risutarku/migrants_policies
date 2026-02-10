@@ -23,9 +23,8 @@ def render_policy_xlsx(values: Dict[str, Any], out_name: str) -> Path:
         raise FileNotFoundError(f"Template not found: {TEMPLATE_PATH}")
 
     wb = load_workbook(TEMPLATE_PATH)
-    ws = wb.active  # если лист фиксированный — можно wb["Лист1"]
+    ws = wb.active  # либо wb["ИмяЛиста"]
 
-    # TODO: ПОМЕНЯЙ адреса ячеек под твой шаблон
     mapping = {
         "policy_number": "B6",
         "start_date": "B9",
@@ -34,8 +33,8 @@ def render_policy_xlsx(values: Dict[str, Any], out_name: str) -> Path:
         "issue_date": "J9",
         "insured_full_name": "C11",
         "birthday": "H11",
-        "document_number": "J11",
-        "premium_total": "H27",
+        "document_number": "J11",   
+        "premium_total": "H27",   
     }
 
     for key, cell in mapping.items():

@@ -5,12 +5,12 @@ import asyncio
 router = APIRouter(tags=["scan"])
 
 
-@router.post("/", response_model=ScanResponse)
+@router.post("", response_model=ScanResponse)
 async def scan():
     """
-    Endpoint to trigger a scan operation.
-    This is a placeholder for the actual scan logic.
+    TODO: здесь будет интеграция с внешней системой распознавания паспорта
     """
+    
     await asyncio.sleep(2)
     # Here you would implement the logic for scanning, e.g., scanning files, directories, etc.
     return {
