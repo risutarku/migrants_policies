@@ -117,18 +117,18 @@ function back() {
       <h2 class="text-2xl font-semibold text-blue-600">
         {{ Number(price || 0).toLocaleString() }} ₽
       </h2>
-
+      <!-- 
       <img
         src="/sbp.png"
         alt="SBP"
         class="w-100 h-auto my-6 select-none pointer-events-none"
-      />
+      /> -->
 
-      <div class="w-full grid gap-4 grid-cols-1 sm:grid-cols-2">
+      <div class="w-full">
         <button
           @click="payByCard"
           :disabled="loading"
-          class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-6 shadow-sm transition-all w-full"
+          class="w-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-6 shadow-sm transition-all"
           :class="
             loading
               ? 'border-blue-500 bg-blue-50 opacity-60 cursor-wait'
@@ -136,13 +136,6 @@ function back() {
           "
         >
           <img src="/icons/card.svg" alt="card" class="w-8 h-8" />
-          <span class="font-medium">{{ t("payment_init.credit_card") }}</span>
-        </button>
-
-        <button
-          class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-gray-300 p-6 bg-white shadow-sm"
-        >
-          <img src="/icons/cash.svg" alt="cash" class="w-8 h-8" />
           <span class="font-medium">{{ t("payment_init.cash") }}</span>
         </button>
       </div>

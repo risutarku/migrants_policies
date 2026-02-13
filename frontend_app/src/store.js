@@ -22,7 +22,7 @@ export const useFlowStore = defineStore("flow", {
     },
     formPolicy: {
       title: "",
-      price: 0,
+      price: 1500,
     },
     formContacts: {
       phone_number: "",

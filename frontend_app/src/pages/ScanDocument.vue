@@ -18,6 +18,30 @@ const scanning = ref(false);
 const overlayVisible = ref(false);
 const errorMsg = ref("");
 const withRegistration = ref(true);
+const stageText = ref("");
+let stageTimer = null;
+
+function startProgressText() {
+  const stages = [
+    "Загружаем изображение…",
+    "Отправляем в сервис распознавания…",
+    "Распознаём данные…",
+    "Проверяем результат…",
+    "Почти готово…",
+  ];
+  let i = 0;
+  stageText.value = stages[0];
+  stageTimer = setInterval(() => {
+    i = Math.min(i + 1, stages.length - 1);
+    stageText.value = stages[i];
+  }, 2500);
+}
+
+function stopProgressText() {
+  if (stageTimer) clearInterval(stageTimer);
+  stageTimer = null;
+  stageText.value = "";
+}
 
 // если нужно привести дату DD.MM.YYYY -> YYYY-MM-DD для <input type="date">
 function toISODateMaybe(s) {
@@ -39,11 +63,13 @@ function back() {
 function startOverlay() {
   overlayVisible.value = true;
   scanning.value = true;
+  startProgressText();
 }
 
 function stopOverlay() {
   scanning.value = false;
-  setTimeout(() => (overlayVisible.value = false), 1500);
+  stopProgressText();
+  overlayVisible.value = false;
 }
 
 async function onFilesSelected(e) {
@@ -123,25 +149,11 @@ async function onFilesSelected(e) {
         src="/scan_document.png"
         alt="scan"
         class="w-120 h-auto pointer-events-none select-none"
+        loading="eager"
       />
 
       <!-- NEW: выбор файлов паспорта -->
       <div class="w-full max-w-md text-left space-y-3">
-        <label
-          class="flex items-center gap-3 text-base font-medium text-gray-700 cursor-pointer"
-        >
-          <input
-            type="checkbox"
-            v-model="withRegistration"
-            class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            :disabled="scanning"
-          />
-          {{
-            t("scan_document.with_registration") ||
-            "Включая страницу с пропиской"
-          }}
-        </label>
-
         <input
           type="file"
           accept="image/*"
@@ -165,13 +177,28 @@ async function onFilesSelected(e) {
     </main>
 
     <!-- Scanning stripe overlay -->
-    <div
+    <!-- <div
       v-if="overlayVisible"
       class="absolute inset-0 pointer-events-none overflow-hidden"
     >
       <div
         class="absolute top-0 left-0 w-full h-2 bg-blue-500 animate-scan-strip"
       ></div>
+    </div> -->
+
+    <div
+      v-if="overlayVisible"
+      class="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center z-50"
+    >
+      <div
+        class="h-10 w-10 rounded-full border-4 border-gray-300 border-t-blue-600 animate-spin"
+      ></div>
+      <div class="mt-4 text-lg font-semibold text-gray-800">
+        {{ stageText || "Распознаём документ…" }}
+      </div>
+      <div class="mt-2 text-sm text-gray-600">
+        Обычно занимает 5–15 секунд. Пожалуйста, не закрывайте страницу.
+      </div>
     </div>
 
     <div class="w-full flex flex-col items-center gap-3">
@@ -181,14 +208,6 @@ async function onFilesSelected(e) {
         :disabled="scanning"
       >
         {{ t("scan_document.back") }}
-      </button>
-
-      <button
-        @click="$router.push('/edit')"
-        class="w-full max-w-xs rounded-2xl bg-gray-100 py-4 px-6 text-gray-800 text-lg font-semibold shadow hover:bg-gray-200 active:shadow-none transition-all"
-        :disabled="scanning"
-      >
-        {{ t("scan_document.skip") || "Пропустить и заполнить вручную" }}
       </button>
     </div>
   </div>

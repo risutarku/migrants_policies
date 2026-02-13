@@ -41,11 +41,10 @@ def _extract_fields(result: Dict[str, Any]) -> Dict[str, Any]:
 
 
 async def add_document(cfg: BeorgConfig, images_b64: List[str], doc_type: str) -> str:
-    # ВАЖНО: путь как в примере. Слэш в конце не обязателен, но можно добавить.
     url = f"{cfg.base_url.rstrip('/')}/api/bescan/add_document"
 
     # как в примере с сайта: process_info на каждую картинку
-    process_info = [{"type": doc_type, "key": f"{doc_type}1"} for _ in images_b64]
+    process_info = [{"type": doc_type, "key": doc_type} for _ in images_b64]
 
     payload = {
         "token": cfg.token,
@@ -86,11 +85,11 @@ async def get_result(cfg: BeorgConfig, document_id: str) -> Dict[str, Any]:
 
 
 async def scan_passport(cfg: BeorgConfig, images_b64: List[str], with_registration: bool) -> Dict[str, Any]:
-    doc_type = "PASSPORT_REG" if with_registration else "PASSPORT"
+    doc_type = "PASSPORT"
 
     doc_id = await add_document(cfg, images_b64, doc_type=doc_type)
 
-    deadline = asyncio.get_event_loop().time() + 30.0
+    deadline = asyncio.get_event_loop().time() + 120.0
     while True:
         res = await get_result(cfg, doc_id)
 

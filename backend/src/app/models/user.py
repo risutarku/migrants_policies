@@ -8,8 +8,8 @@ from pydantic import BaseModel, field_validator
 
 
 class SexEnum(str, Enum):
-    male = "male"
-    female = "female"
+    male = "M"
+    female = "F"
 
 
 def _parse_date(v) -> date:

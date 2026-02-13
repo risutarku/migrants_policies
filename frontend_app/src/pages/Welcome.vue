@@ -26,7 +26,7 @@ function handleClick() {
     alert(t("landing.employee_required") || "Введите табельный номер");
     return;
   }
-  router.push("/choose_policy");
+  router.push("/contact_info");
 }
 </script>
 
