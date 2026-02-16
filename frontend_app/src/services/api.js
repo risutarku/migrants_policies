@@ -1,6 +1,4 @@
-// src/services/api.js
-// const BASE = 'http://localhost:8000'   // поправь, если бек слушает иначе
-export const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+export const BASE = "";
 
 async function request(path, options = {}) {
   const r = await fetch(`${BASE}${path}`, {
@@ -18,14 +16,14 @@ async function request(path, options = {}) {
 }
 
 export function scanDocument() {
-  return request("/scan", {
+  return request("/api/scan", {
     method: "POST",
     body: JSON.stringify({}),
   });
 }
 
 export function savePolicyDraft(payload) {
-  return request("/payment/draft-save", {
+  return request("/api/payment/draft-save", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -33,18 +31,18 @@ export function savePolicyDraft(payload) {
 
 export function initPayment(payload) {
   // payload: { policy_id, session_id, idempotency_key }
-  return request("/payment/init", {
+  return request("/api/payment/init", {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export function getPaymentStatus(sessionId) {
-  return request(`/payment/status/${sessionId}`, { method: "GET" });
+  return request(`/api/payment/status/${sessionId}`, { method: "GET" });
 }
 
 export async function downloadPolicyById(policyId) {
-  const r = await fetch(`${BASE}/policy/download/${policyId}`, {
+  const r = await fetch(`/api/policy/download/${policyId}`, {
     method: "GET",
   });
   if (!r.ok) {
@@ -55,7 +53,7 @@ export async function downloadPolicyById(policyId) {
 }
 
 export function scanPassportBeorg(imagesBase64, withRegistration = true) {
-  return request("/scan/beorg-passport", {
+  return request("/api/scan/beorg-passport", {
     method: "POST",
     body: JSON.stringify({
       images: imagesBase64,
