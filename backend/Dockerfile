@@ -7,6 +7,8 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/src /app/backend/src
+COPY backend/templates /app/backend/templates
+
 
 ENV PYTHONPATH=/app/backend/src
 
