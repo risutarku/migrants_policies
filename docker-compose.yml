@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    env_file:
+      - .env
     container_name: policy_backend
     volumes:
       - ./data:/app/data # CSV и сканы
