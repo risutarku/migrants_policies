@@ -20,6 +20,23 @@ onUnmounted(() => {
   if (pollTo) clearTimeout(pollTo);
 });
 
+function uuid() {
+  // modern browsers + https / localhost
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+
+  // fallback: достаточно для session/idempotency
+  const bytes = globalThis.crypto?.getRandomValues
+    ? globalThis.crypto.getRandomValues(new Uint8Array(16))
+    : Uint8Array.from({ length: 16 }, () => Math.floor(Math.random() * 256));
+
+  // RFC4122 v4
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 async function payByCard() {
   if (loading.value) return;
   if (!flow.policyId) {
@@ -30,8 +47,8 @@ async function payByCard() {
   loading.value = true;
 
   try {
-    if (!flow.sessionId) flow.sessionId = crypto.randomUUID();
-    const idempotencyKey = crypto.randomUUID();
+    if (!flow.sessionId) flow.sessionId = uuid();
+    const idempotencyKey = uuid();
 
     const data = await initPayment({
       policy_id: flow.policyId,
