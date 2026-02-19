@@ -141,11 +141,11 @@ function back() {
         class="w-100 h-auto my-6 select-none pointer-events-none"
       /> -->
 
-      <div class="w-full">
+      <div class="w-full grid gap-4 grid-cols-1 sm:grid-cols-2">
         <button
           @click="payByCard"
           :disabled="loading"
-          class="w-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-6 shadow-sm transition-all"
+          class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-6 shadow-sm transition-all w-full"
           :class="
             loading
               ? 'border-blue-500 bg-blue-50 opacity-60 cursor-wait'
@@ -153,6 +153,20 @@ function back() {
           "
         >
           <img src="/icons/card.svg" alt="card" class="w-8 h-8" />
+          <span class="font-medium">{{ t("payment_init.credit_card") }}</span>
+        </button>
+
+        <button
+          @click="payByCard"
+          :disabled="loading"
+          class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-6 shadow-sm transition-all w-full"
+          :class="
+            loading
+              ? 'border-blue-500 bg-blue-50 opacity-60 cursor-wait'
+              : 'border-gray-300 bg-white hover:bg-gray-50'
+          "
+        >
+          <img src="/icons/cash.svg" alt="cash" class="w-8 h-8" />
           <span class="font-medium">{{ t("payment_init.cash") }}</span>
         </button>
       </div>
@@ -170,3 +184,4 @@ function back() {
     </button>
   </div>
 </template>
+
