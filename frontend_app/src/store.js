@@ -31,6 +31,7 @@ export const useFlowStore = defineStore("flow", {
     sessionId: null,
     txId: null,
     arrived_for_hire: false,
+    isRussianPassport: true,
     employeeTabNumber: "",
     policyId: null,
   }),

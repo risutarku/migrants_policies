@@ -87,7 +87,11 @@ async function onFilesSelected(e) {
     }
 
     // 2) отправляем на бэк
-    const res = await scanPassportBeorg(images, withRegistration.value);
+    const res = await scanPassportBeorg(
+      images,
+      withRegistration.value,
+      flow.isRussianPassport,
+    );
     const fields = res?.fields || {};
 
     // 3) маппинг в твою форму
@@ -154,6 +158,18 @@ async function onFilesSelected(e) {
 
       <!-- NEW: выбор файлов паспорта -->
       <div class="w-full max-w-md text-left space-y-3">
+        <label
+          class="flex items-center gap-3 text-base font-medium text-gray-700 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            v-model="flow.isRussianPassport"
+            :disabled="scanning"
+            class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          Паспорт РФ
+        </label>
+
         <input
           type="file"
           accept="image/*"

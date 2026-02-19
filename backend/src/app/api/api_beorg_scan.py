@@ -12,6 +12,7 @@ router = APIRouter()
 class BeorgScanReq(BaseModel):
     images: list[str]
     with_registration: bool = True
+    is_russian_passport: bool = True
 
 
 @router.post("/beorg-passport")
@@ -26,7 +27,12 @@ async def beorg_scan(req: BeorgScanReq):
         raise HTTPException(500, "Beorg API config missing (BEOCR_BASE_URL/TOKEN/MACHINE_UID/PROJECT_ID)")
 
     try:
-        return await scan_passport(cfg, req.images, with_registration=req.with_registration)
+        return await scan_passport(
+            cfg,
+            req.images,
+            with_registration=req.with_registration,
+            is_russian_passport=req.is_russian_passport,
+        )
     except BeorgApiError as e:
         # 502 = внешний сервис упал/ответил ошибкой
         raise HTTPException(502, str(e))

@@ -52,12 +52,17 @@ export async function downloadPolicyById(policyId) {
   return r.blob();
 }
 
-export function scanPassportBeorg(imagesBase64, withRegistration = true) {
+export function scanPassportBeorg(
+  imagesBase64,
+  withRegistration = true,
+  isRussianPassport = true,
+) {
   return request("/api/scan/beorg-passport", {
     method: "POST",
     body: JSON.stringify({
       images: imagesBase64,
       with_registration: withRegistration,
+      is_russian_passport: isRussianPassport,
     }),
   });
 }

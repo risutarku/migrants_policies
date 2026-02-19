@@ -84,8 +84,13 @@ async def get_result(cfg: BeorgConfig, document_id: str) -> Dict[str, Any]:
         return {"_status": "processing", "_code": r.status_code, "_body": r.text}
 
 
-async def scan_passport(cfg: BeorgConfig, images_b64: List[str], with_registration: bool) -> Dict[str, Any]:
-    doc_type = "PASSPORT"
+async def scan_passport(
+    cfg: BeorgConfig,
+    images_b64: List[str],
+    with_registration: bool,
+    is_russian_passport: bool = True,
+) -> Dict[str, Any]:
+    doc_type = "PASSPORT" if is_russian_passport else "PASSPORT_FRGN"
 
     doc_id = await add_document(cfg, images_b64, doc_type=doc_type)
 
